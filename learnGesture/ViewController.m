@@ -11,11 +11,19 @@
      知道什么时候要用手势，什么时候直接用按钮。
  
  写一个图片浏览器：点一下放大，双击缩小，捏合缩放，拖动移动，旋转旋转。
+ 
+ 关于手势这块：
+ 1. 知道有哪些手势就行
+ 2. 常用的是点击，最好触发
+ 3. 长按的时候有三个状态，在按中的时候，实现手和图片是一起动的
+ 4. 手势冲突
+ 5. 手势穿透
+ 
  */
 
 #import "ViewController.h"
 
-@interface ViewController ()
+@interface ViewController () <UIScrollViewDelegate>
 
 @property (nonatomic, assign) BOOL isZoomed; // 是否放大
 @property (nonatomic, strong) UIScrollView *scrollView; // 添加scrollView属性
@@ -34,20 +42,19 @@
                                                                              300,
                                                                              400)];
     self.scrollView.backgroundColor = [UIColor systemGrayColor];
-    
     [self.view addSubview:self.scrollView];
+    
     
     // 2. 创建 imageview
     UIImage *image = [UIImage imageNamed:@"image_02"];
     self.imageView = [[UIImageView alloc]initWithImage:image];
-    self.imageView.frame = CGRectMake(0,
-                                  0,
-                                 image.size.width, image.size.height);
+    self.imageView.frame = CGRectMake(0, 0, image.size.width, image.size.height);
     self.imageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.scrollView addSubview:self.imageView];
     
     // 设置内容的展示空间和图片一样大
     self.scrollView.contentSize = image.size; 
+    
     
     // 3. 创建 tap 点击手势 - 添加到imageView上，而不是整个view
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(handleTap:)];
@@ -59,13 +66,19 @@
     
     self.isZoomed = NO;
     
-}
-
-
-
-- (void)createGesture:(UIViewController *)vc{
+    self.scrollView.delegate = self; // 设置代理
+    
+    self.scrollView.minimumZoomScale = 0.5;
+    self.scrollView.maximumZoomScale = 3.0;
     
 }
+
+
+// 返回要缩放的子控件，也就是这个 imageview
+- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView{
+    return self.imageView;
+}
+
 
 
 
